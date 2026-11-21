@@ -21,7 +21,7 @@ python3 $S/fetch_reviews.py 123456789:AppName --out reviews.json      # reruns m
 python3 $S/tag_reviews.py reviews.json --since 2024-11-01 --by-app --dump low.txt
 ```
 
-Apple's review feed only returns the newest ~500 reviews per app, country and sort order, and it can be flaky or empty from cloud machines.
+Fetching defaults are light (4 countries, 5 pages per sort); the script lists apps that came back thin so you can widen just those. Apple's review feed only returns the newest ~500 reviews per app, country and sort order, and it can be flaky or empty from cloud machines.
 
 ## Tests
 

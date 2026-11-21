@@ -17,7 +17,7 @@ The full workflow below is the one that worked for "research and file issues". M
 
 | The user wants | Do | Skip |
 |---|---|---|
-| **A quick answer** ("top 5 complaints, rough numbers") | Step 2 with 5-10 apps and `--countries us gb ca au`, fetched in the background while you run one quick search; then answer in the length and file they asked for: the list, each item with a number, one line on what the numbers are based on | Steps 1, 3-6. No brief, no issues, no long caveats section |
+| **A quick answer** ("top 5 complaints, rough numbers") | Step 2 with 5-10 apps on the fetch script's light defaults, fetched in the background while you run one quick search; then answer in the length and file they asked for: the list, each item with a number, one line on what the numbers are based on | Steps 1, 3-6. No brief, no issues, no long caveats section |
 | **A brief, no code yet** ("something I can send my cofounder") | Steps 2, 3 and 5 | The codebase check (step 4) and issues (step 6). Mark recommendations by priority instead of built/missing |
 | **Research turned into work** ("…and turn it into issues") | Everything | Nothing |
 
@@ -44,8 +44,9 @@ Use the bundled scripts (pure Python standard library, public Apple endpoints, n
 ```bash
 S=<skill-dir>/scripts
 python3 $S/find_apps.py "baby photo album" "family photo sharing" --country us   # pick 8-15 competitors, favour many ratings
-python3 $S/fetch_reviews.py 521633042:Tinybeans 935672069:FamilyAlbum ... --out <scratch>/reviews.json
-# rerun for apps that came back thin; it merges into the same file, never overwrites (--fresh to restart)
+python3 $S/fetch_reviews.py 521633042:Tinybeans 935672069:FamilyAlbum ... --out <scratch>/reviews.json   # run in the background
+# light defaults (4 countries, 5 pages); rerun only the apps it lists as thin with --countries nz ie in sg za / --max-pages 10
+# reruns merge into the same file, never overwrite (--fresh to restart)
 python3 $S/tag_reviews.py <scratch>/reviews.json --since <2 years ago> --examples 3 --by-app --dump <scratch>/low.txt
 python3 $S/tag_reviews.py --print-themes > <scratch>/themes.json   # then add product-specific themes and rerun with --themes
 ```
@@ -123,7 +124,8 @@ End with:
 
 ## Pitfalls seen in practice
 
-- **Feed thinness:** the review feed often returns a single page, and nothing for small apps. Widen countries and sort orders (reruns merge) before concluding there's no data, and say which apps returned nothing.
+- **Feed thinness:** the review feed often returns a single page, and nothing for small apps. Widen countries and pages for the thin apps (reruns merge) before concluding there's no data, and say which apps returned nothing.
+- **Over-fetching:** a few hundred recent low-star reviews per app is enough for theme shares. Tens of thousands of reviews cost minutes of waiting without changing the ranking; widen only where the sample is thin.
 - **Category drift:** competitors found by search terms can include unrelated apps (generic photo editors for a baby-journal search). Filter by what the app actually does.
 - **Recommending what the OS just shipped:** always check the incumbent's latest release notes.
 - **Issues that say "see the brief":** a coding session may not be able to open it. Put the essential context in the issue itself.

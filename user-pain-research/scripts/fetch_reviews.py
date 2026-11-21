@@ -2,8 +2,8 @@
 """Fetch App Store customer reviews from Apple's public RSS feed.
 
 Usage:
-  fetch_reviews.py ID[:Name] ... [--countries us gb ca au nz ie in sg za]
-                   [--sorts mostrecent mosthelpful] [--max-pages 10]
+  fetch_reviews.py ID[:Name] ... [--countries us gb ca au]
+                   [--sorts mostrecent mosthelpful] [--max-pages 5]
                    [--empty-retries 2] [--out reviews.json] [--fresh]
 
 Feed: https://itunes.apple.com/{country}/rss/customerreviews/page={p}/id={id}/sortby={sort}/json
@@ -12,10 +12,12 @@ Limits worth stating in any write-up: Apple serves at most about the newest
 500 reviews (10 pages of 50) per app, country and sort order. Big apps
 dominate any pooled sample.
 
-A full default run (9 countries x 2 sorts) takes several minutes per batch of
-apps. For a quick answer use --countries us gb ca au, and run long fetches in
-the background. Results are saved after each app, so an interrupted run keeps
-what it fetched and a rerun merges.
+Defaults are deliberately light (4 countries x 2 sorts x 5 pages, up to
+~2,000 reviews per app): plenty for theme shares, and a run over 10 apps
+usually finishes in a few minutes. Apps that come back thin are listed at the
+end; widen only those (--countries nz ie in sg za, --max-pages 10) and rerun,
+since results merge. Run long fetches in the background. Results are saved
+after each app, so an interrupted run keeps what it fetched.
 
 The feed is also flaky: it often answers with an empty page (or a 403) that
 has data a few seconds later, and it throttles long runs. So this script
@@ -79,9 +81,10 @@ def lab(e, key):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("apps", nargs="+", help="App Store id, optionally ID:Name")
-    ap.add_argument("--countries", nargs="+", default="us gb ca au nz ie in sg za".split())
+    ap.add_argument("--countries", nargs="+", default="us gb ca au".split())
     ap.add_argument("--sorts", nargs="+", default=["mostrecent", "mosthelpful"])
-    ap.add_argument("--max-pages", type=int, default=10)
+    ap.add_argument("--max-pages", type=int, default=5,
+                    help="pages of 50 per country and sort (feed max 10; default 5)")
     ap.add_argument("--empty-retries", type=int, default=2,
                     help="times to retry an empty first page before giving up (default 2)")
     ap.add_argument("--out", default="reviews.json")
@@ -157,6 +160,11 @@ def main():
         name = spec.partition(":")[2] or spec.partition(":")[0]
         flag = "  <- nothing yet" if not total[name] else ""
         print(f"{name[:30]:30} {added[name]:>6} {total[name]:>7} {low[name]:>6}{flag}", file=sys.stderr)
+    thin = [s.partition(":")[2] or s.partition(":")[0] for s in a.apps
+            if 0 < total[s.partition(":")[2] or s.partition(":")[0]] < 100]
+    if thin:
+        print(f"\nthin (<100 reviews): {', '.join(thin)}. If they matter, rerun just those with"
+              " --countries nz ie in sg za and/or --max-pages 10 (results merge).", file=sys.stderr)
     if empty_slots:
         print(f"\n{len(empty_slots)} app/country/sort combinations came back empty even after retries;"
               " rerun later for those (results merge):", file=sys.stderr)
