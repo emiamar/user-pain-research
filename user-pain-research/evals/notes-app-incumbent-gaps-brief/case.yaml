@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: notes-app-incumbent-gaps-brief
+expected_outcome: |
+  brief.md covers specific complaints about Apple Notes, Bear, Notion and Obsidian with sources,
+  counted review evidence, recent Apple Notes changes, ranked roadmap recommendations and caveats.
+  No issue files.

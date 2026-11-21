@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: habit-app-research-to-issues
+expected_outcome: |
+  brief.md summarises counted App Store review evidence and Reddit/forum sources with caveats,
+  ties findings to the repo (Pro-locked export/history, streak reset), and issues/ holds
+  handover-style issue files with titles, Labels lines, file pointers and done-when checklists,
+  without duplicating the existing widgets item.
+context:
+  scaffold_script: place-files.sh
