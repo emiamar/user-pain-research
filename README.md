@@ -26,3 +26,7 @@ Apple's review feed only returns the newest ~500 reviews per app, country and so
 ## Tests
 
 `user-pain-research/evals/` holds three test cases in the skill-creator / `claude plugin eval` layout.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
