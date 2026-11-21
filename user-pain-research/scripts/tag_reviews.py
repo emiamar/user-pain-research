@@ -27,6 +27,7 @@ from collections import Counter
 GENERIC_THEMES = {
     "ads, pop-ups and upselling": r"\bads?\b|advert|pop.?ups?|upsell|commercial",
     "paywall, price rises, free turned paid": r"paywall|subscri|premium|pay(ing)? (for|to)|price|expensive|money|\$\d|used to be free|no longer free|cost",
+    "billing, trials, cancelling, refunds": r"charg(ed|ing)|bill(ed|ing)|free trial|trial (ended|period)|cancel|refund|auto.?renew|renewal|scam",
     "locked out, lost data, can't export": r"lost (all|my)|losing|deleted|disappear|gone|can'?t (export|download|get (my|them))|export|held hostage|locked out|backup",
     "crashes, bugs, slow": r"crash|bug|glitch|freez|slow|lag|broken|doesn'?t work|not working|won'?t (load|open)",
     "sync and upload problems": r"sync|upload|icloud|not saving|won'?t save|stuck",
@@ -36,7 +37,7 @@ GENERIC_THEMES = {
     "missing or removed features": r"removed|no longer|missing|wish (it|there|you)|please add|feature request|bring back|can'?t even",
     "bad redesign or confusing UI": r"update ruined|new (update|design|version)|redesign|confusing|cluttered|interface|\bUI\b|hard to (use|find|navigate)|unintuitive",
     "notifications broken or spammy": r"notification|reminder|spam|alerts?\b",
-    "support unresponsive": r"support|customer service|no (reply|response)|never (heard|responded|replied)|refund",
+    "support unresponsive": r"support|customer service|no (reply|response)|never (heard|responded|replied)",
     "platform gaps (iPad, Mac, web, dark mode)": r"ipad|\bmac\b|desktop|web (version|app)|browser|dark mode|apple watch|android",
 }
 
@@ -125,12 +126,14 @@ def main():
         for r in rs[: a.examples]:
             print(f'   {r["app"]} {r.get("date", "")}: "{r.get("title", "")}"')
     if a.by_app:
-        top_apps = [x for x, _ in Counter(r["app"] for r in low).most_common(8)]
-        print("\nlow-star counts by theme and app (top 8 apps):")
+        pool = recent if a.since else low
+        ids = {id(r) for r in pool}
+        top_apps = [x for x, _ in Counter(r["app"] for r in pool).most_common(8)]
+        print(f"\nlow-star counts by theme and app (top 8 apps{', since ' + a.since if a.since else ''}):")
         print(f"{'theme':42}" + "".join(f"{x[:10]:>11}" for x in top_apps))
-        print(f"{'(all low-star)':42}" + "".join(f"{sum(1 for r in low if r['app'] == x):>11}" for x in top_apps))
+        print(f"{'(all low-star)':42}" + "".join(f"{sum(1 for r in pool if r['app'] == x):>11}" for x in top_apps))
         for k, rs in sorted(hits.items(), key=lambda kv: len(kv[1]), reverse=True):
-            c = Counter(r["app"] for r in rs)
+            c = Counter(r["app"] for r in rs if id(r) in ids)
             print(f"{k[:42]:42}" + "".join(f"{c[x]:>11}" for x in top_apps))
     if a.dump:
         with open(a.dump, "w") as f:

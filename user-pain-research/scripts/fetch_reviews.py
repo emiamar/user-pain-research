@@ -12,6 +12,11 @@ Limits worth stating in any write-up: Apple serves at most about the newest
 500 reviews (10 pages of 50) per app, country and sort order. Big apps
 dominate any pooled sample.
 
+A full default run (9 countries x 2 sorts) takes several minutes per batch of
+apps. For a quick answer use --countries us gb ca au, and run long fetches in
+the background. Results are saved after each app, so an interrupted run keeps
+what it fetched and a rerun merges.
+
 The feed is also flaky: it often answers with an empty page (or a 403) that
 has data a few seconds later, and it throttles long runs. So this script
 retries empty first pages, and by default MERGES into an existing --out file
@@ -59,6 +64,13 @@ def get_page(app_id, country, sort, page):
     return [e for e in entries if "im:rating" in e]  # first entry can be app metadata
 
 
+def save(out, path):
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(out, f, indent=1, ensure_ascii=False)
+    os.replace(tmp, path)
+
+
 def lab(e, key):
     v = e.get(key, {})
     return v.get("label", "") if isinstance(v, dict) else ""
@@ -75,6 +87,9 @@ def main():
     ap.add_argument("--out", default="reviews.json")
     ap.add_argument("--fresh", action="store_true", help="overwrite --out instead of merging into it")
     a = ap.parse_args()
+    # accept "us,gb ca" as well as "us gb ca"
+    a.countries = [c.strip().lower() for x in a.countries for c in x.split(",") if c.strip()]
+    a.sorts = [c.strip() for x in a.sorts for c in x.split(",") if c.strip()]
 
     out = []
     if os.path.exists(a.out) and not a.fresh:
@@ -130,9 +145,9 @@ def main():
                         out.append(rec)
                         added[name] += 1
                     time.sleep(0.2)
+        save(out, a.out)  # after each app, so an interrupted run keeps what it got
 
-    with open(a.out, "w") as f:
-        json.dump(out, f, indent=1, ensure_ascii=False)
+    save(out, a.out)
 
     total = Counter(r["app"] for r in out)
     low = Counter(r["app"] for r in out if r.get("rating", 0) <= 3)

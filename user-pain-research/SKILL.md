@@ -17,7 +17,7 @@ The full workflow below is the one that worked for "research and file issues". M
 
 | The user wants | Do | Skip |
 |---|---|---|
-| **A quick answer** ("top 5 complaints, rough numbers") | Step 2 (reviews, plus a quick search), then answer in the length and file they asked for: the list, each item with a number, one line on what the numbers are based on | Steps 1, 3-6. No brief, no issues, no long caveats section |
+| **A quick answer** ("top 5 complaints, rough numbers") | Step 2 with 5-10 apps and `--countries us gb ca au`, fetched in the background while you run one quick search; then answer in the length and file they asked for: the list, each item with a number, one line on what the numbers are based on | Steps 1, 3-6. No brief, no issues, no long caveats section |
 | **A brief, no code yet** ("something I can send my cofounder") | Steps 2, 3 and 5 | The codebase check (step 4) and issues (step 6). Mark recommendations by priority instead of built/missing |
 | **Research turned into work** ("…and turn it into issues") | Everything | Nothing |
 
@@ -51,7 +51,8 @@ python3 $S/tag_reviews.py --print-themes > <scratch>/themes.json   # then add pr
 ```
 
 - **The feed is flaky.** It returns empty pages or 403s that work a minute later, throttles long runs, and may serve nothing at all to cloud machines. The fetch script retries and lists the app/country combinations that stayed empty; wait a minute and rerun for those. If it stays empty for everything, say so plainly and use another counted source: Google Play review pages, or comments from a forum archive (below) tagged with the same script (it accepts any JSON list of `{app, rating, title, body, date}`). Don't silently swap in the App Store page's handful of "featured" reviews; they're curated and mostly 5-star.
-- **One app can swamp the sample.** If the tagger flags an app with over ~30% of low-star reviews, report shares with and without it (`--exclude-app`).
+- **One app can swamp the sample.** If the tagger flags an app with over ~30% of low-star reviews, report shares with and without it (`--exclude-app`). In a quick answer, one clause is enough ("~43%, 36% without Headspace").
+- **Split money complaints.** The generic themes keep "too expensive / paywall" apart from "billing, trials, cancelling, refunds"; for subscription apps the second is often the angrier, more fixable one. Keep them separate when you report.
 
 - Save working files in the session's scratch or temp directory, not the repo.
 - **Read the low-star dump, not just the counts.** Keyword tags over- and under-count. Reading surfaces the specific, quotable pains ("a 2026 update removed dates and captions from the upload screen"), app-by-app patterns and themes the regexes missed (check the untagged count).
@@ -64,7 +65,7 @@ Use web search for:
 - **Platform forums:** Apple Community, Google support forums, MacRumors.
 - **Recent tech press** on the incumbent's latest release. Check what it *just added*, so you don't recommend building something the OS now does free.
 
-Reddit often blocks automated fetches and the search tool may not return reddit pages. If so, try in this order: a `site:reddit.com` search for thread titles and snippets; the PullPush archive (`https://api.pullpush.io/reddit/search/comment/?q=<terms>&subreddit=<sub>&size=100`); then Hacker News (`https://hn.algolia.com/api/v1/search?query=<terms>`) and the apps' own feedback boards or community forums. Say which you used. Filter out developers promoting their own apps; they're common in these threads.
+Reddit often blocks automated fetches and the search tool may not return reddit pages. If so, use a `site:reddit.com` search for thread titles and snippets, then the sources that usually answer: the apps' own community forums and feedback boards, Apple Community, and Hacker News (`https://hn.algolia.com/api/v1/search?query=<terms>`). The PullPush archive of Reddit comments (`https://api.pullpush.io/reddit/search/comment/?q=<terms>&size=100`) sometimes works and sometimes refuses automated requests; try it once, don't fight it. Say which sources you used. Filter out developers promoting their own apps; they're common in these threads.
 
 Keep a source link for every claim you'll use.
 
